@@ -3,6 +3,8 @@ package parser
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"path"
 	"strings"
 )
 
@@ -119,4 +121,20 @@ func (p *Parser) ToString() string {
 func (p *Parser) LoadFromString(text string) error {
 	input := bufio.NewScanner(strings.NewReader(text))
 	return p.parse(input)
+}
+
+// ParseFile parses the given file in .ini format.
+func (p *Parser) ParseFile(filePath string) error {
+	if path.Ext(filePath) != ".ini" {
+		return fmt.Errorf(".ini format is only support")
+	}
+
+	file, err := os.Open(filePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	return p.parse(scanner)
 }

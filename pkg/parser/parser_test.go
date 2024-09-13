@@ -3,6 +3,8 @@ package parser
 import (
 	"bufio"
 	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -1020,6 +1022,108 @@ key3=value3
 			t.Errorf("Expected error for invalid INI string, but got no error")
 		} else {
 			expectedError := "line 4: invalid key-value pair: key2"
+			if err.Error() != expectedError {
+				t.Errorf("Expected error '%s', but got '%s'", expectedError, err.Error())
+			}
+		}
+	})
+}
+
+func TestParseFile(t *testing.T) {
+	t.Run("Valid INI File", func(t *testing.T) {
+		content := `
+		[section1]
+		key1=value1
+key2=value2
+
+[section2]
+keyA=valueA
+keyB=valueB
+`
+		expected := map[string]map[string]string{
+			"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+			"section2": {
+				"keyA": "valueA",
+				"keyB": "valueB",
+			},
+		}
+
+		// Create a temporary directory and .ini file
+		dir := t.TempDir()
+		filePath := filepath.Join(dir, "test.ini")
+		err := os.WriteFile(filePath, []byte(content), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create temporary INI file: %v", err)
+		}
+
+		p := NewParser()
+
+		err = p.ParseFile(filePath)
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		iniData := p.data
+
+		if len(iniData) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
+		}
+
+		for section, keys := range expected {
+			if _, ok := iniData[section]; !ok {
+				t.Errorf("Expected section %s, not found", section)
+			}
+
+			for key, expectedValue := range keys {
+				if val, ok := iniData[section][key]; !ok || val != expectedValue {
+					t.Errorf("Expected key %s in section %s to have value %s, got %s", key, section, expectedValue, val)
+				}
+			}
+		}
+	})
+
+	t.Run("Invalid File Extension", func(t *testing.T) {
+
+		content := `
+		[section1]
+		key1=value1
+		key2=value2
+		`
+
+		// Create a temporary file with an invalid extension
+		dir := t.TempDir()
+		filePath := filepath.Join(dir, "test.txt")
+		err := os.WriteFile(filePath, []byte(content), 0644)
+		if err != nil {
+			t.Fatalf("Failed to create temporary file: %v", err)
+		}
+
+		p := NewParser()
+
+		err = p.ParseFile(filePath)
+		if err == nil {
+			t.Errorf("Expected error for invalid file extension, but got no error")
+		} else {
+			expectedError := ".ini format is only support"
+			if err.Error() != expectedError {
+				t.Errorf("Expected error '%s', but got '%s'", expectedError, err.Error())
+			}
+		}
+	})
+
+	t.Run("Non-Existent File", func(t *testing.T) {
+		// Initialize the parser
+		p := NewParser()
+
+		// Parse a non-existent file and expect an error
+		err := p.ParseFile("non_existent.ini")
+		if err == nil {
+			t.Errorf("Expected error for non-existent file, but got no error")
+		} else {
+			expectedError := "open non_existent.ini: no such file or directory"
 			if err.Error() != expectedError {
 				t.Errorf("Expected error '%s', but got '%s'", expectedError, err.Error())
 			}
