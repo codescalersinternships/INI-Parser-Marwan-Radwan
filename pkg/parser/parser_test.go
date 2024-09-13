@@ -585,3 +585,73 @@ keyA=valueA
 	})
 
 }
+
+func TestGetGlobalKeys(t *testing.T) {
+	t.Run("Global Keys - No Sections", func(t *testing.T) {
+
+		input := `
+key1=value1
+key2=value2		
+`
+		expected := map[string]string{
+			"key1": "value1",
+			"key2": "value2",
+		}
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p := NewParser()
+		err := p.parse(scanner)
+
+		iniData := p.GetGlobalKeys()
+
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		if len(iniData) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
+		}
+
+		for key, expectedValue := range iniData {
+			if val, ok := iniData[key]; !ok || val != expectedValue {
+				t.Errorf("Expected key %s to have value %s, got %s", key, expectedValue, val)
+			}
+		}
+	})
+
+	t.Run("Global Keys - With Sections", func(t *testing.T) {
+
+		input := `
+key1=value1
+key2=value2
+
+[section1]
+keyA=valueA
+`
+		expected := map[string]string{
+			"key1": "value1",
+			"key2": "value2",
+		}
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p := NewParser()
+		err := p.parse(scanner)
+
+		iniData := p.GetGlobalKeys()
+
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		if len(iniData) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
+		}
+
+		for key, expectedValue := range iniData {
+			if val, ok := iniData[key]; !ok || val != expectedValue {
+				t.Errorf("Expected key %s to have value %s, got %s", key, expectedValue, val)
+			}
+		}
+	})
+}

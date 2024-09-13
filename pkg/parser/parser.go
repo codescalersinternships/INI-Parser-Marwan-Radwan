@@ -80,3 +80,8 @@ func (p *Parser) GetSectionNames() []string {
 func (p *Parser) GetSections() map[string]map[string]string {
 	return p.data
 }
+
+// GetGlobalKeys returns a map of global keys in the parser.
+func (p *Parser) GetGlobalKeys() map[string]string {
+	return p.globalKeys
+}
