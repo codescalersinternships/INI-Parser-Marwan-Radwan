@@ -6,7 +6,7 @@ on:
     branches:
       - main
 
-name: INI-Parser-Marwan-Radwan
+name: Lint and Build
 
 jobs:
   lint:
@@ -22,3 +22,15 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           version: v1.55
+  build:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.21
+      - name: Build the project
+        run: go build -v ./...
