@@ -85,3 +85,11 @@ func (p *Parser) GetSections() map[string]map[string]string {
 func (p *Parser) GetGlobalKeys() map[string]string {
 	return p.globalKeys
 }
+
+// Get retrieves the value associated with the given section and key from the files's data.
+func (p *Parser) Get(section string, key string) (string, bool) {
+	if sectionData, ok := p.data[section]; ok {
+		return sectionData[key], ok
+	}
+	return "", false
+}

@@ -655,3 +655,60 @@ keyA=valueA
 		}
 	})
 }
+
+func TestGet(t *testing.T) {
+	t.Run("Single Section", func(t *testing.T) {
+		input := `
+[section1]
+key1=value1
+key2=value2
+`
+		expected := "value1"
+
+		p := NewParser()
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p.parse(scanner)
+
+		val, ok := p.Get("section1", "key1")
+		if val != expected || !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected, true, val, ok)
+		}
+
+		val2, ok := p.Get("section1", "key3")
+		if !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", "", false, val2, ok)
+		}
+
+	})
+
+	t.Run("Multiple Section", func(t *testing.T) {
+		input := `
+[section1]
+key1=value1
+key2=value2
+[section2]
+key3=value3
+key4=value4
+`
+		expected := "value1"
+
+		p := NewParser()
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p.parse(scanner)
+
+		val, ok := p.Get("section1", "key1")
+		if val != expected || !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected, true, val, ok)
+		}
+
+		val2, ok := p.Get("section1", "key3")
+		if !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", "", false, val2, ok)
+		}
+
+	})
+}
