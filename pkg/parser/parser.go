@@ -75,3 +75,8 @@ func (p *Parser) parse(scanner *bufio.Scanner) error {
 func (p *Parser) GetSectionNames() []string {
 	return p.sections
 }
+
+// GetSections returns a map of sections in the INI file, each section is represented by a map of key-value pairs.
+func (p *Parser) GetSections() map[string]map[string]string {
+	return p.data
+}
