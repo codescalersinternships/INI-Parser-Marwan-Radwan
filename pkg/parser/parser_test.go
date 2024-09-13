@@ -839,3 +839,190 @@ keyB=valueB
 		}
 	})
 }
+
+func TestLoadFromString(t *testing.T) {
+	t.Run("Valid INI String", func(t *testing.T) {
+		input := `
+[section1]
+key1=value1
+key2=value2
+
+[section2]
+keyA=valueA
+keyB=valueB
+`
+		expected := map[string]map[string]string{
+			"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+			"section2": {
+				"keyA": "valueA",
+				"keyB": "valueB",
+			},
+		}
+
+		p := NewParser()
+		err := p.LoadFromString(input)
+
+		if err != nil {
+			t.Errorf("Error loading from string: %v", err)
+		}
+
+		iniData := p.data
+
+		if len(iniData) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
+		}
+
+		for section, keys := range expected {
+			if _, ok := iniData[section]; !ok {
+				t.Errorf("Expected section %s, not found", section)
+			}
+
+			for key, expectedValue := range keys {
+				if val, ok := iniData[section][key]; !ok || val != expectedValue {
+					t.Errorf("Expected key %s in section %s to have value %s, got %s", key, section, expectedValue, val)
+				}
+			}
+		}
+	})
+
+	t.Run("Empty String", func(t *testing.T) {
+		input := ``
+
+		p := NewParser()
+		err := p.LoadFromString(input)
+
+		if err != nil {
+			t.Errorf("Error loading from string: %v", err)
+		}
+
+		iniData := p.data
+
+		if len(iniData) != 0 {
+			t.Errorf("Expected 0 sections, got %d", len(iniData))
+		}
+	})
+
+	t.Run("String with Comments and Empty Lines", func(t *testing.T) {
+		input := `
+; this is a comment
+# this is another comment
+
+[section1]
+key1=value1
+
+[section2]
+keyA=valueA		
+`
+		expected := map[string]map[string]string{
+			"section1": {
+				"key1": "value1",
+			},
+			"section2": {
+				"keyA": "valueA",
+			},
+		}
+
+		p := NewParser()
+		err := p.LoadFromString(input)
+
+		if err != nil {
+			t.Errorf("Error loading from string: %v", err)
+		}
+
+		iniData := p.data
+
+		if len(iniData) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
+		}
+
+		for section, keys := range expected {
+			if _, ok := iniData[section]; !ok {
+				t.Errorf("Expected section %s, not found", section)
+			}
+
+			for key, expectedValue := range keys {
+				if val, ok := iniData[section][key]; !ok || val != expectedValue {
+					t.Errorf("Expected key %s in section %s to have value %s, got %s", key, section, expectedValue, val)
+				}
+			}
+		}
+	})
+
+	t.Run("String with Global Keys", func(t *testing.T) {
+		input := `
+key1=value1
+key2=value2
+
+[section1]
+keyA=valueA
+`
+		expectedGlobalKeys := map[string]string{
+			"key1": "value1",
+			"key2": "value2",
+		}
+		expectedSections := map[string]map[string]string{
+			"section1": {
+				"keyA": "valueA",
+			},
+		}
+
+		p := NewParser()
+		err := p.LoadFromString(input)
+
+		if err != nil {
+			t.Errorf("Error loading from string: %v", err)
+		}
+
+		globalKeys := p.globalKeys
+		sections := p.data
+
+		if len(globalKeys) != len(expectedGlobalKeys) {
+			t.Errorf("Expected %d global keys, got %d", len(expectedGlobalKeys), len(globalKeys))
+		}
+
+		for key, expectedValue := range expectedGlobalKeys {
+			if val, ok := globalKeys[key]; !ok || val != expectedValue {
+				t.Errorf("Expected global key %s to have value %s, got %s", key, expectedValue, val)
+			}
+		}
+
+		if len(sections) != len(expectedSections) {
+			t.Errorf("Expected %d sections, got %d", len(expectedSections), len(sections))
+		}
+
+		for section, keys := range expectedSections {
+			if _, ok := sections[section]; !ok {
+				t.Errorf("Expected section %s, not found", section)
+			}
+
+			for key, expectedValue := range keys {
+				if val, ok := sections[section][key]; !ok || val != expectedValue {
+					t.Errorf("Expected key %s in section %s to have value %s, got %s", key, section, expectedValue, val)
+				}
+			}
+		}
+	})
+
+	t.Run("Invalid INI String", func(t *testing.T) {
+		input := `
+[section1]
+key1=value1
+key2
+key3=value3
+`
+		p := NewParser()
+		err := p.LoadFromString(input)
+
+		if err == nil {
+			t.Errorf("Expected error for invalid INI string, but got no error")
+		} else {
+			expectedError := "line 4: invalid key-value pair: key2"
+			if err.Error() != expectedError {
+				t.Errorf("Expected error '%s', but got '%s'", expectedError, err.Error())
+			}
+		}
+	})
+}
