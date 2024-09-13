@@ -101,3 +101,16 @@ func (p *Parser) Set(section string, key string, value string) {
 	}
 	p.data[section][key] = value
 }
+
+// ToString returns a string representation of the Parser object.
+func (p *Parser) ToString() string {
+	var str string
+	for sectionName, section := range p.data {
+		str += fmt.Sprintf("[%v]\n", sectionName)
+		for k, v := range section {
+			str += fmt.Sprintf("%v=%v\n", k, v)
+		}
+	}
+
+	return str
+}

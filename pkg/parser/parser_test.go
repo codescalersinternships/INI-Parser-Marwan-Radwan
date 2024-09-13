@@ -778,3 +778,64 @@ func TestSet(t *testing.T) {
 		}
 	})
 }
+
+func TestToString(t *testing.T) {
+	t.Run("Single Section", func(t *testing.T) {
+		p := NewParser()
+
+		p.data = map[string]map[string]string{
+			"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+		}
+
+		expected := `[section1]
+key1=value1
+key2=value2
+`
+
+		result := p.ToString()
+		if result != expected {
+			t.Errorf("Expected to get \n%s\n ,but got:\n%s", expected, result)
+		}
+	})
+
+	t.Run("Multiple Sections", func(t *testing.T) {
+		p := NewParser()
+
+		p.data = map[string]map[string]string{
+			"section1": {
+				"key1": "value1",
+				"key2": "value2",
+			},
+			"section2": {
+				"keyA": "valueA",
+				"keyB": "valueB",
+			},
+		}
+		expected := `[section1]
+key1=value1
+key2=value2
+[section2]
+keyA=valueA
+keyB=valueB
+`
+
+		result := p.ToString()
+		if result != expected {
+			t.Errorf("Expected to get \n%s\n ,but got:\n%s", expected, result)
+		}
+	})
+
+	t.Run("No Sections", func(t *testing.T) {
+		p := NewParser()
+
+		expected := ``
+
+		result := p.ToString()
+		if result != expected {
+			t.Errorf("Expected to get \n%s\n ,but got:\n%s", expected, result)
+		}
+	})
+}
