@@ -3,6 +3,7 @@ package parser
 import (
 	"bufio"
 	"fmt"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -312,5 +313,131 @@ that_spans_multiple_lines
 `
 
 		fmt.Println(input)
+	})
+}
+
+func TestGetSectionNames(t *testing.T) {
+	t.Run("Single Section", func(t *testing.T) {
+		input := `
+[section1]
+key1=value1
+key2=value2
+`
+		expected := []string{"section1"}
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p := NewParser()
+
+		err := p.parse(scanner)
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		sectionNames := p.GetSectionNames()
+
+		if len(sectionNames) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(sectionNames))
+		}
+
+		if !reflect.DeepEqual(sectionNames, expected) {
+			t.Errorf("Expected section names %v, got %v", expected, sectionNames)
+		}
+
+	})
+
+	t.Run("Multiple Section", func(t *testing.T) {
+		input := `
+[section1]
+key1=value1
+key2=value2
+
+[section2]
+keyA=valueA
+keyB=valueB
+`
+		expected := []string{"section1", "section2"}
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p := NewParser()
+		err := p.parse(scanner)
+
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		sectionNames := p.GetSectionNames()
+
+		if len(sectionNames) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(sectionNames))
+		}
+
+		if !reflect.DeepEqual(sectionNames, expected) {
+			t.Errorf("Expected section names %v, got %v", expected, sectionNames)
+		}
+
+	})
+
+	t.Run("Comments and Empty Lines", func(t *testing.T) {
+
+		input := `
+; this is a comment
+# this is another comment
+
+[section1]
+key1=value1
+
+[section2]
+keyA=valueA		
+`
+		expected := []string{"section1", "section2"}
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p := NewParser()
+		err := p.parse(scanner)
+
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		sectionNames := p.GetSectionNames()
+
+		if len(sectionNames) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(sectionNames))
+		}
+
+		if !reflect.DeepEqual(sectionNames, expected) {
+			t.Errorf("Expected section names %v, got %v", expected, sectionNames)
+		}
+	})
+
+	t.Run("No Sections", func(t *testing.T) {
+
+		input := `
+key1=value1
+key2=value2		
+`
+		expected := []string{}
+
+		scanner := bufio.NewScanner(strings.NewReader(input))
+
+		p := NewParser()
+		err := p.parse(scanner)
+
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
+
+		sectionNames := p.GetSectionNames()
+
+		if len(sectionNames) != len(expected) {
+			t.Errorf("Expected %d sections, got %d", len(expected), len(sectionNames))
+		}
+
+		if !reflect.DeepEqual(sectionNames, expected) {
+			t.Errorf("Expected section names %v, got %v", expected, sectionNames)
+		}
 	})
 }

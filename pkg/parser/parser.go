@@ -70,3 +70,8 @@ func (p *Parser) parse(scanner *bufio.Scanner) error {
 
 	return scanner.Err()
 }
+
+// GetSectionNames lists all section names in the file.
+func (p *Parser) GetSectionNames() []string {
+	return p.sections
+}
