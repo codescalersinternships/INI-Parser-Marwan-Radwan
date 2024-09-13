@@ -712,3 +712,69 @@ key4=value4
 
 	})
 }
+
+func TestSet(t *testing.T) {
+	t.Run("Set Key in Existing Section", func(t *testing.T) {
+		p := NewParser()
+		p.Set("section1", "key1", "value1")
+
+		expected := "value1"
+		val, ok := p.Get("section1", "key1")
+		if val != expected || !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected, true, val, ok)
+		}
+	})
+
+	t.Run("Set Key in New Section", func(t *testing.T) {
+		p := NewParser()
+		p.Set("section2", "key2", "value2")
+
+		expected := "value2"
+		val, ok := p.Get("section2", "key2")
+		if val != expected || !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected, true, val, ok)
+		}
+	})
+
+	t.Run("Overwrite Existing Key", func(t *testing.T) {
+		p := NewParser()
+		p.Set("section1", "key1", "value1")
+		p.Set("section1", "key1", "newValue1")
+
+		expected := "newValue1"
+		val, ok := p.Get("section1", "key1")
+		if val != expected || !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected, true, val, ok)
+		}
+	})
+
+	t.Run("Set Key in Empty Section", func(t *testing.T) {
+		p := NewParser()
+		p.Set("section3", "key3", "value3")
+
+		expected := "value3"
+		val, ok := p.Get("section3", "key3")
+		if val != expected || !ok {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected, true, val, ok)
+		}
+	})
+
+	t.Run("Set Multiple Keys in Same Section", func(t *testing.T) {
+		p := NewParser()
+		p.Set("section4", "key4", "value4")
+		p.Set("section4", "key5", "value5")
+
+		expected1 := "value4"
+		expected2 := "value5"
+
+		val1, ok1 := p.Get("section4", "key4")
+		if val1 != expected1 || !ok1 {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected1, true, val1, ok1)
+		}
+
+		val2, ok2 := p.Get("section4", "key5")
+		if val2 != expected2 || !ok2 {
+			t.Errorf("Expected to get %s and %v, got %s and %v", expected2, true, val2, ok2)
+		}
+	})
+}

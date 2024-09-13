@@ -93,3 +93,11 @@ func (p *Parser) Get(section string, key string) (string, bool) {
 	}
 	return "", false
 }
+
+// Set sets the value of a key in a specific section of the INI file.
+func (p *Parser) Set(section string, key string, value string) {
+	if _, exist := p.data[section]; !exist {
+		p.data[section] = make(map[string]string)
+	}
+	p.data[section][key] = value
+}
