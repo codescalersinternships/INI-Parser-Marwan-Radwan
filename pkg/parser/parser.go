@@ -149,12 +149,7 @@ func (p *Parser) ToString() string {
 // LoadFromString loads the contents of a string into the parser and parses it to sections and keys-values.
 func (p *Parser) LoadFromString(text string) error {
 	input := bufio.NewScanner(strings.NewReader(text))
-	err := p.parse(input)
-	if err != nil {
-		return fmt.Errorf("failed to parse input string: %w", err)
-	}
-
-	return nil
+	return p.parse(input)
 }
 
 // ParseFile parses the given file in .ini format.
@@ -170,10 +165,5 @@ func (p *Parser) ParseFile(filePath string) error {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	err = p.parse(scanner)
-	if err != nil {
-		return fmt.Errorf("failed to parse file: %w", err)
-	}
-
-	return nil
+	return p.parse(scanner)
 }

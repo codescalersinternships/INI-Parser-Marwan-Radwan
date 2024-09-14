@@ -29,12 +29,11 @@ key2=value2
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.data
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.data
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -79,12 +78,11 @@ keyB=valueB
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.data
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.data
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -128,12 +126,11 @@ keyA=valueA
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.data
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.data
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -167,12 +164,11 @@ key2=value2
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.globalKeys
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.globalKeys
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -202,12 +198,11 @@ keyA=valueA
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.globalKeys
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.globalKeys
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -229,16 +224,12 @@ key2
 key3=value3
 `
 
-		// Create a scanner to read the input
 		scanner := bufio.NewScanner(strings.NewReader(input))
 
-		// Initialize the parser
 		p := NewParser()
 
-		// Parse the input and expect an error
 		err := p.parse(scanner)
 
-		// We expect an error, so check that it is not nil
 		if err == nil {
 			t.Errorf("Expected error for invalid key-value pairs, but got no error")
 		} else {
@@ -463,12 +454,11 @@ key2=value2
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.GetSections()
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.GetSections()
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -513,12 +503,11 @@ keyB=valueB
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.GetSections()
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.GetSections()
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -562,12 +551,11 @@ keyA=valueA
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.GetSections()
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.GetSections()
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -604,12 +592,11 @@ key2=value2
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.GetGlobalKeys()
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.GetGlobalKeys()
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -639,12 +626,11 @@ keyA=valueA
 
 		p := NewParser()
 		err := p.parse(scanner)
-
-		iniData := p.GetGlobalKeys()
-
 		if err != nil {
 			t.Errorf("Error parsing ini file: %v", err)
 		}
+
+		iniData := p.GetGlobalKeys()
 
 		if len(iniData) != len(expected) {
 			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
@@ -671,7 +657,10 @@ key2=value2
 
 		scanner := bufio.NewScanner(strings.NewReader(input))
 
-		p.parse(scanner)
+		err := p.parse(scanner)
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
 
 		val, ok := p.Get("section1", "key1")
 		if val != expected || !ok {
@@ -700,7 +689,10 @@ key4=value4
 
 		scanner := bufio.NewScanner(strings.NewReader(input))
 
-		p.parse(scanner)
+		err := p.parse(scanner)
+		if err != nil {
+			t.Errorf("Error parsing ini file: %v", err)
+		}
 
 		val, ok := p.Get("section1", "key1")
 		if val != expected || !ok {
@@ -1118,10 +1110,8 @@ keyB=valueB
 	})
 
 	t.Run("Non-Existent File", func(t *testing.T) {
-		// Initialize the parser
 		p := NewParser()
 
-		// Parse a non-existent file and expect an error
 		err := p.ParseFile("non_existent.ini")
 		if err == nil {
 			t.Errorf("Expected error for non-existent file, but got no error")
