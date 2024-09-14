@@ -791,6 +791,7 @@ func TestToString(t *testing.T) {
 				"key2": "value2",
 			},
 		}
+		p.sections = []string{"section1"}
 
 		expected := `[section1]
 key1=value1
@@ -816,6 +817,8 @@ key2=value2
 				"keyB": "valueB",
 			},
 		}
+		p.sections = []string{"section1", "section2"}
+
 		expected := `[section1]
 key1=value1
 key2=value2
