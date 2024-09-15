@@ -149,72 +149,6 @@ keyA=valueA
 		}
 	})
 
-	t.Run("Global Keys - No Sections", func(t *testing.T) {
-
-		input := `
-key1=value1
-key2=value2		
-`
-		expected := map[string]string{
-			"key1": "value1",
-			"key2": "value2",
-		}
-
-		scanner := bufio.NewScanner(strings.NewReader(input))
-
-		p := NewParser()
-		err := p.parse(scanner)
-		if err != nil {
-			t.Errorf("Error parsing ini file: %v", err)
-		}
-
-		iniData := p.globalKeys
-
-		if len(iniData) != len(expected) {
-			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
-		}
-
-		for key, expectedValue := range iniData {
-			if val, ok := iniData[key]; !ok || val != expectedValue {
-				t.Errorf("Expected key %s to have value %s, got %s", key, expectedValue, val)
-			}
-		}
-	})
-
-	t.Run("Global Keys - With Sections", func(t *testing.T) {
-
-		input := `
-key1=value1
-key2=value2
-
-[section1]
-keyA=valueA
-`
-		expected := map[string]string{
-			"key1": "value1",
-			"key2": "value2",
-		}
-		scanner := bufio.NewScanner(strings.NewReader(input))
-
-		p := NewParser()
-		err := p.parse(scanner)
-		if err != nil {
-			t.Errorf("Error parsing ini file: %v", err)
-		}
-
-		iniData := p.globalKeys
-
-		if len(iniData) != len(expected) {
-			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
-		}
-
-		for key, expectedValue := range iniData {
-			if val, ok := iniData[key]; !ok || val != expectedValue {
-				t.Errorf("Expected key %s to have value %s, got %s", key, expectedValue, val)
-			}
-		}
-	})
-
 	t.Run("Invalid Key-Value Without Separator", func(t *testing.T) {
 
 		input := `
@@ -406,33 +340,6 @@ keyA=valueA
 		}
 	})
 
-	t.Run("No Sections", func(t *testing.T) {
-
-		input := `
-key1=value1
-key2=value2		
-`
-		expected := []string{}
-
-		scanner := bufio.NewScanner(strings.NewReader(input))
-
-		p := NewParser()
-		err := p.parse(scanner)
-
-		if err != nil {
-			t.Errorf("Error parsing ini file: %v", err)
-		}
-
-		sectionNames := p.GetSectionNames()
-
-		if len(sectionNames) != len(expected) {
-			t.Errorf("Expected %d sections, got %d", len(expected), len(sectionNames))
-		}
-
-		if !reflect.DeepEqual(sectionNames, expected) {
-			t.Errorf("Expected section names %v, got %v", expected, sectionNames)
-		}
-	})
 }
 
 func TestGetSections(t *testing.T) {
@@ -574,74 +481,6 @@ keyA=valueA
 		}
 	})
 
-}
-
-func TestGetGlobalKeys(t *testing.T) {
-	t.Run("Global Keys - No Sections", func(t *testing.T) {
-
-		input := `
-key1=value1
-key2=value2		
-`
-		expected := map[string]string{
-			"key1": "value1",
-			"key2": "value2",
-		}
-
-		scanner := bufio.NewScanner(strings.NewReader(input))
-
-		p := NewParser()
-		err := p.parse(scanner)
-		if err != nil {
-			t.Errorf("Error parsing ini file: %v", err)
-		}
-
-		iniData := p.GetGlobalKeys()
-
-		if len(iniData) != len(expected) {
-			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
-		}
-
-		for key, expectedValue := range iniData {
-			if val, ok := iniData[key]; !ok || val != expectedValue {
-				t.Errorf("Expected key %s to have value %s, got %s", key, expectedValue, val)
-			}
-		}
-	})
-
-	t.Run("Global Keys - With Sections", func(t *testing.T) {
-
-		input := `
-key1=value1
-key2=value2
-
-[section1]
-keyA=valueA
-`
-		expected := map[string]string{
-			"key1": "value1",
-			"key2": "value2",
-		}
-		scanner := bufio.NewScanner(strings.NewReader(input))
-
-		p := NewParser()
-		err := p.parse(scanner)
-		if err != nil {
-			t.Errorf("Error parsing ini file: %v", err)
-		}
-
-		iniData := p.GetGlobalKeys()
-
-		if len(iniData) != len(expected) {
-			t.Errorf("Expected %d sections, got %d", len(expected), len(iniData))
-		}
-
-		for key, expectedValue := range iniData {
-			if val, ok := iniData[key]; !ok || val != expectedValue {
-				t.Errorf("Expected key %s to have value %s, got %s", key, expectedValue, val)
-			}
-		}
-	})
 }
 
 func TestGet(t *testing.T) {
@@ -942,61 +781,6 @@ keyA=valueA
 
 			for key, expectedValue := range keys {
 				if val, ok := iniData[section][key]; !ok || val != expectedValue {
-					t.Errorf("Expected key %s in section %s to have value %s, got %s", key, section, expectedValue, val)
-				}
-			}
-		}
-	})
-
-	t.Run("String with Global Keys", func(t *testing.T) {
-		input := `
-key1=value1
-key2=value2
-
-[section1]
-keyA=valueA
-`
-		expectedGlobalKeys := map[string]string{
-			"key1": "value1",
-			"key2": "value2",
-		}
-		expectedSections := map[string]map[string]string{
-			"section1": {
-				"keyA": "valueA",
-			},
-		}
-
-		p := NewParser()
-		err := p.LoadFromString(input)
-
-		if err != nil {
-			t.Errorf("Error loading from string: %v", err)
-		}
-
-		globalKeys := p.globalKeys
-		sections := p.data
-
-		if len(globalKeys) != len(expectedGlobalKeys) {
-			t.Errorf("Expected %d global keys, got %d", len(expectedGlobalKeys), len(globalKeys))
-		}
-
-		for key, expectedValue := range expectedGlobalKeys {
-			if val, ok := globalKeys[key]; !ok || val != expectedValue {
-				t.Errorf("Expected global key %s to have value %s, got %s", key, expectedValue, val)
-			}
-		}
-
-		if len(sections) != len(expectedSections) {
-			t.Errorf("Expected %d sections, got %d", len(expectedSections), len(sections))
-		}
-
-		for section, keys := range expectedSections {
-			if _, ok := sections[section]; !ok {
-				t.Errorf("Expected section %s, not found", section)
-			}
-
-			for key, expectedValue := range keys {
-				if val, ok := sections[section][key]; !ok || val != expectedValue {
 					t.Errorf("Expected key %s in section %s to have value %s, got %s", key, section, expectedValue, val)
 				}
 			}

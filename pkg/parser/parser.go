@@ -10,17 +10,15 @@ import (
 )
 
 type Parser struct {
-	data       map[string]map[string]string
-	globalKeys map[string]string
-	sections   []string // Maintain the sections in order
+	data     map[string]map[string]string
+	sections []string // Maintain the sections in order
 }
 
 // NewParser creates a new parser
 func NewParser() *Parser {
 	return &Parser{
-		data:       make(map[string]map[string]string),
-		globalKeys: make(map[string]string),
-		sections:   []string{},
+		data:     make(map[string]map[string]string),
+		sections: []string{},
 	}
 }
 
@@ -78,11 +76,7 @@ func (p *Parser) parseKeyValue(line string, lineNumber int, currentSection strin
 	value = strings.ReplaceAll(value, `\t`, "\t")
 	value = strings.Trim(value, `"`)
 
-	if currentSection == "" {
-		p.globalKeys[key] = value
-	} else {
-		p.data[currentSection][key] = value
-	}
+	p.data[currentSection][key] = value
 
 	return nil
 }
@@ -95,11 +89,6 @@ func (p *Parser) GetSectionNames() []string {
 // GetSections returns a map of sections in the INI file, each section is represented by a map of key-value pairs.
 func (p *Parser) GetSections() map[string]map[string]string {
 	return p.data
-}
-
-// GetGlobalKeys returns a map of global keys in the parser.
-func (p *Parser) GetGlobalKeys() map[string]string {
-	return p.globalKeys
 }
 
 // Get retrieves the value associated with the given section and key from the files's data.
@@ -122,11 +111,6 @@ func (p *Parser) Set(section string, key string, value string) {
 // ToString returns a string representation of the Parser object.
 func (p *Parser) ToString() string {
 	var builder strings.Builder
-
-	// Write global keys first
-	for k, v := range p.globalKeys {
-		fmt.Fprintf(&builder, "%s=%s\n", k, v)
-	}
 
 	// Then write sections in order
 	for _, sectionName := range p.sections {
